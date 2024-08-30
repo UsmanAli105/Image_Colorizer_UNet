@@ -112,6 +112,8 @@ if __name__ == '__main__':
             # Resume training
             net, train_losses, val_losses = train(model, train_dataloader, test_dataloader, criterion, optimizer, 10, DEVICE)  # Adjust start_epoch as needed
             save_net(model, SAVED_MODELS_FOLDER_PATH, SAVED_MODEL_NAME)
+
+            print('Program Finished')
         
 
     except Exception as e:
