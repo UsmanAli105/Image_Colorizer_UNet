@@ -161,5 +161,5 @@ def load_model(saved_models_folder_path, saved_model_name):
         dict: The state dictionary of the PyTorch model.
     """
     checkpoint_path = os.path.join(saved_models_folder_path, f"{saved_model_name}.pth")
-    state_dict = torch.load(checkpoint_path, map_location=torch.device('cpu'))
+    state_dict = torch.load(checkpoint_path, map_location=torch.device('cpu'), weights_only=True)
     return state_dict
