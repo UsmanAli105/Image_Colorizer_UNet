@@ -40,7 +40,7 @@ def split_image_files(image_files):
     return train_image_files, test_image_files
 
 
-def train(net, train_loader, val_loader, criterion, optimizer, num_epochs, device):
+def train(net, train_loader, val_loader, criterion, optimizer, num_epochs, device, output_activation):
     """
     Train a PyTorch model and evaluate its performance on a validation dataset.
 
@@ -75,6 +75,7 @@ def train(net, train_loader, val_loader, criterion, optimizer, num_epochs, devic
             optimizer.zero_grad()
 
             outputs = net(gray_images)
+            outputs = output_activation(outputs)
 
             loss = criterion(outputs, color_images)
             temp_loss.append(loss.item())

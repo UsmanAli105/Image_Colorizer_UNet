@@ -60,11 +60,11 @@ if __name__ == '__main__':
         model = UNet(input_size, output_size)
 
         output_activation = nn.Sigmoid()
-        criterion = nn.MSELoss()
+        criterion = nn.CrossEntropyLoss()
         optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
 
         if MODE == TRAIN:
-            net, train_losses, val_losses = train(model, train_dataloader, test_dataloader, criterion, optimizer, 10, DEVICE)
+            net, train_losses, val_losses = train(model, train_dataloader, test_dataloader, criterion, optimizer, 10, DEVICE, output_activation)
             save_net(model, SAVED_MODELS_FOLDER_PATH, SAVED_MODEL_NAME)
         elif MODE == TEST:
             # Load the saved model
