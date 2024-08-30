@@ -67,11 +67,37 @@ if __name__ == '__main__':
             net, train_losses, val_losses = train(model, train_dataloader, test_dataloader, criterion, optimizer, 10, DEVICE)
             save_net(model, SAVED_MODELS_FOLDER_PATH, SAVED_MODEL_NAME)
         elif MODE == TEST:
-            pass
+            # Load the saved model
+            saved_weights = load_model(SAVED_MODELS_FOLDER_PATH, SAVED_MODEL_NAME)
+            model.load_state_dict(saved_weights)
+            model.to(DEVICE)
+            model.eval()
+            
+            # Load a test image
+            test_grayscale_image, _ = test_dataset.__getitem__(0)
+            test_grayscale_image = test_grayscale_image.unsqueeze(0).to(DEVICE)  # Add batch dimension
 
+            # Make prediction
+            with torch.no_grad():
+                model_output = model(test_grayscale_image)
+                model_output = model_output.squeeze(0).cpu()  # Remove batch dimension and move to CPU
 
+            # Convert the model output to an image format
+            model_output_image = model_output.permute(1, 2, 0).clamp(0, 1)  # Ensure values are between 0 and 1
 
+            # Convert the test grayscale image to RGB for visualization
+            test_grayscale_image = test_grayscale_image.squeeze(0).cpu().permute(1, 2, 0)
+            test_grayscale_image = test_grayscale_image.repeat(1, 1, 3)  # Repeat channels for RGB
 
+            # Display the images
+            fig, axs = plt.subplots(1, 2, figsize=(12, 6))
+            axs[0].imshow(test_grayscale_image)
+            axs[0].set_title('Test Grayscale Image')
+            axs[0].axis('off')
+            axs[1].imshow(model_output_image)
+            axs[1].set_title('Model Output Image')
+            axs[1].axis('off')
+            plt.show()
 
     except Exception as e:
         print(e)
