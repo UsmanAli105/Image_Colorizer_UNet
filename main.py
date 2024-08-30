@@ -74,7 +74,7 @@ if __name__ == '__main__':
             model.eval()
             
             # Load a test image
-            test_grayscale_image, _ = test_dataset.__getitem__(0)
+            test_grayscale_image, _ = train_dataset.__getitem__(0)
             test_grayscale_image = test_grayscale_image.unsqueeze(0).to(DEVICE)  # Add batch dimension
 
             # Make prediction
@@ -98,6 +98,17 @@ if __name__ == '__main__':
             axs[1].set_title('Model Output Image')
             axs[1].axis('off')
             plt.show()
+
+        elif MODE == CONTINUE_TRAINING:
+            # Load the saved model
+            saved_weights = load_model(SAVED_MODELS_FOLDER_PATH, SAVED_MODEL_NAME)
+            model.load_state_dict(saved_weights)
+            model.to(DEVICE)
+            
+            # Resume training
+            net, train_losses, val_losses = train(model, train_dataloader, test_dataloader, criterion, optimizer, 10, DEVICE, num_epochs=10)  # Adjust start_epoch as needed
+            save_net(model, SAVED_MODELS_FOLDER_PATH, SAVED_MODEL_NAME)
+        
 
     except Exception as e:
         print(e)
