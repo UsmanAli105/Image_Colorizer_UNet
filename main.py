@@ -106,7 +106,7 @@ if __name__ == '__main__':
             model.to(DEVICE)
             
             # Resume training
-            net, train_losses, val_losses = train(model, train_dataloader, test_dataloader, criterion, optimizer, 10, DEVICE, num_epochs=10)  # Adjust start_epoch as needed
+            net, train_losses, val_losses = train(model, train_dataloader, test_dataloader, criterion, optimizer, 10, DEVICE)  # Adjust start_epoch as needed
             save_net(model, SAVED_MODELS_FOLDER_PATH, SAVED_MODEL_NAME)
         
 
