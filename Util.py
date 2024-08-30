@@ -42,26 +42,27 @@ def train(net, train_loader, val_loader, criterion, optimizer, num_epochs, devic
         train_score = np.mean(temp_score)
         train_losses.append(train_loss)
 
-        val_loss, val_score, _, _ = eval_model(net, val_loader, criterion, device)
+        val_loss = eval_model(net, val_loader, criterion, device)
         val_losses.append(val_loss.item())
 
         print(
             f'Epoch: [{epoch + 1}/{num_epochs}]\tTrain Score: {train_score:.4f}\tTrain Loss: {train_loss:.4f}\tVal Score: {val_score:.4f}\tVal Loss: {val_loss:.4f}')
     return net, train_losses, val_losses
 
-
 def eval_model(_net, _val_loader, _criterion, device):
     _net.eval()
     val_loss = 0.0
+    num_batches = len(_val_loader)
+
+    if num_batches == 0:
+        raise ValueError("Validation loader is empty. Cannot perform evaluation.")
+
     with torch.no_grad():
         for gray_images, color_images in _val_loader:
-            gray_images, color_images = gray_images.to(device=device), color_images.to(device=device)
+            gray_images, color_images = gray_images.to(device), color_images.to(device)
             outputs = _net(gray_images)
-            val_loss += _criterion(outputs, color_images)
-        val_loss /= len(_val_loader)
-    return val_loss
+            loss = _criterion(outputs, color_images)
+            val_loss += loss.item()  # Accumulate loss as a scalar
 
-def save_net(_net, path, file_name):
-    if not os.path.isdir(path):
-        os.makedirs(path)
-    torch.save(_net.state_dict(), str(path + '/' + file_name + '.pth'))
+    val_loss /= num_batches  # Compute average loss
+    return val_loss
