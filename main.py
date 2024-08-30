@@ -74,8 +74,8 @@ if __name__ == '__main__':
             model.eval()
             
             # Load a test image
-            test_grayscale_image, _ = train_dataset.__getitem__(0)
-            test_grayscale_image = test_grayscale_image.unsqueeze(0).to(DEVICE)  # Add batch dimension
+            test_grayscale_image, test_colored_image = train_dataset.__getitem__(0)
+            test_grayscale_image = test_grayscale_image.unsqueeze(0).to(DEVICE)
 
             # Make prediction
             with torch.no_grad():
@@ -88,9 +88,13 @@ if __name__ == '__main__':
             # Convert the test grayscale image to RGB for visualization
             test_grayscale_image = test_grayscale_image.squeeze(0).cpu().permute(1, 2, 0)
             test_grayscale_image = test_grayscale_image.repeat(1, 1, 3)  # Repeat channels for RGB
+            test_colored_image = test_colored_image.cpu().permute(1, 2, 0)
 
             # Display the images
-            fig, axs = plt.subplots(1, 2, figsize=(12, 6))
+            fig, axs = plt.subplots(1, 3)
+            axs[2].imshow(test_colored_image)
+            axs[2].set_title('Test Colored Image')
+            axs[2].axis('off')
             axs[0].imshow(test_grayscale_image)
             axs[0].set_title('Test Grayscale Image')
             axs[0].axis('off')
