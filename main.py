@@ -10,7 +10,7 @@ if __name__ == '__main__':
     
     if torch.cuda.is_available():
         DEVICE = torch.device("cuda:0") 
-        print(f'Using Device: {torch.cuda.current_device()}')
+        print(f'Using Device: {torch.cuda.get_device_name(0)}')
     else:
         DEVICE = torch.device("cpu")
         print(f'Using Device: cpu')
@@ -38,8 +38,10 @@ if __name__ == '__main__':
         train_dataset = CustomDataset(train_image_files, DATASET_PATH, image_transforms)
         test_dataset = CustomDataset(test_image_files, DATASET_PATH, image_transforms)
 
-        train_dataloader = DataLoader(train_dataset, batch_size=32, shuffle=True)
-        test_dataloader = DataLoader(test_dataset, batch_size=32, shuffle=True)
+        BATCH_SIZE=8
+
+        train_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
+        test_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=True)
 
         grayscale_image, color_image = train_dataset.__getitem__(0)
 
@@ -59,8 +61,8 @@ if __name__ == '__main__':
         output_size = 3
         model = UNet(input_size, output_size)
 
-        output_activation = nn.Sigmoid()
-        criterion = nn.CrossEntropyLoss()
+        output_activation = nn.ReLU()
+        criterion = nn.MSELoss()
         optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
 
         if MODE == TRAIN:
