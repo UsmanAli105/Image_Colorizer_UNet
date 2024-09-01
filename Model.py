@@ -1,18 +1,19 @@
 import torch.nn as nn
 import torch
 
+
 class DoubleConvLayer(nn.Module):
     def __init__(self, input_size, output_size):
         super(DoubleConvLayer, self).__init__()
         self.conv1 = nn.Conv2d(input_size, output_size, kernel_size=3, padding=1)
-        self.relu = nn.ReLU(inplace=True)
+        self.LeakyReLU = nn.LeakyReLU()
         self.conv2 = nn.Conv2d(output_size, output_size, kernel_size=3, padding=1)
 
     def forward(self, x):
         x = self.conv1(x)
-        x = self.relu(x)
+        x = self.LeakyReLU(x)
         x = self.conv2(x)
-        x = self.relu(x)
+        x = self.LeakyReLU(x)
         return x
 
 
@@ -47,7 +48,7 @@ class Encoder(nn.Module):
         self.down_sample_block_2 = DownSampleBlock(64, 128)
         self.down_sample_block_3 = DownSampleBlock(128, 256)
         self.down_sample_block_4 = DownSampleBlock(256, output_size)
-        self.skip_layer = False
+        self.skip_layer = True
 
     def forward(self, x):
         x, x_conv_1 = self.down_sample_block_1(x)
@@ -96,4 +97,3 @@ class UNet(nn.Module):
         x = self.decoder(x, x_conv_1, x_conv_2, x_conv_3, x_conv_4)
         x = self.conv_1x1(x)
         return x
-

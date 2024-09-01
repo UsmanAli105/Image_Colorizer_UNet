@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import os
 
+
 def normalize_image(x):
     """
     Normalize an image by scaling pixel values to the range [0, 1].
@@ -14,7 +15,8 @@ def normalize_image(x):
     Returns:
         numpy.ndarray or torch.Tensor: The normalized image data with pixel values scaled to the range [0, 1].
     """
-    return x/255.0
+    return x / 255.0
+
 
 def split_image_files(image_files):
     """
@@ -33,10 +35,10 @@ def split_image_files(image_files):
     n = len(image_files)
     train_size = 0.7
     split_index = int(n * train_size)
-    
+
     train_image_files = image_files[:split_index]
     test_image_files = image_files[split_index:]
-    
+
     return train_image_files, test_image_files
 
 
@@ -75,7 +77,7 @@ def train(net, train_loader, val_loader, criterion, optimizer, num_epochs, devic
             optimizer.zero_grad()
 
             outputs = net(gray_images)
-            outputs = output_activation(outputs)
+            outputs = outputs if not output_activation else output_activation(outputs)
 
             loss = criterion(outputs, color_images)
             temp_loss.append(loss.item())
@@ -124,7 +126,7 @@ def eval_model(net, val_loader, criterion, device):
             outputs = net(gray_images)
             loss = criterion(outputs, color_images)
             val_loss += loss.item()
-    
+
     val_loss /= num_batches
     return val_loss
 
@@ -147,6 +149,7 @@ def save_net(net, path, file_name):
     if not os.path.isdir(path):
         os.makedirs(path)
     torch.save(net.state_dict(), os.path.join(path, f"{file_name}.pth"))
+
 
 def load_model(saved_models_folder_path, saved_model_name):
     """
