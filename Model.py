@@ -8,11 +8,14 @@ class DoubleConvLayer(nn.Module):
         self.conv1 = nn.Conv2d(input_size, output_size, kernel_size=3, padding=1)
         self.LeakyReLU = nn.LeakyReLU()
         self.conv2 = nn.Conv2d(output_size, output_size, kernel_size=3, padding=1)
+        self.bn1 = nn.BatchNorm2d(output_size)
+        self.bn2 = nn.BatchNorm2d(output_size)
 
     def forward(self, x):
         x = self.conv1(x)
-        x = self.LeakyReLU(x)
+        x = self.bn1(x)
         x = self.conv2(x)
+        x = self.bn2(x)
         x = self.LeakyReLU(x)
         return x
 

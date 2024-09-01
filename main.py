@@ -31,15 +31,15 @@ if __name__ == '__main__':
             transforms.Resize((256, 256), antialias=True),
         ])
 
-        image_files = os.listdir(DATASET_PATH)[:100]
+        image_files = os.listdir(DATASET_PATH)
 
         train_image_files, test_image_files = split_image_files(image_files)
 
         train_dataset = CustomDataset(train_image_files, DATASET_PATH, image_transforms)
         test_dataset = CustomDataset(test_image_files, DATASET_PATH, image_transforms)
 
-        BATCH_SIZE = 1
-        NUM_EPOCH = 100
+        BATCH_SIZE = 8
+        NUM_EPOCH = 25
         LEARNING_RATE = 10e-2
         MOMENTUM = 0.9
 
@@ -64,7 +64,7 @@ if __name__ == '__main__':
         output_size = 3
         model = UNet(input_size, output_size)
 
-        output_activation = False
+        output_activation = nn.Sigmoid()
         criterion = nn.MSELoss()
         optimizer = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE, momentum=MOMENTUM)
 
@@ -104,15 +104,15 @@ if __name__ == '__main__':
 
             # Display the images
             fig, axs = plt.subplots(1, 3)
-            axs[2].imshow(test_colored_image)
-            axs[2].set_title('Test Colored Image')
-            axs[2].axis('off')
-            axs[0].imshow(test_grayscale_image)
-            axs[0].set_title('Test Grayscale Image')
-            axs[0].axis('off')
-            axs[1].imshow(model_output_image)
-            axs[1].set_title('Model Output Image')
+            axs[1].imshow(test_colored_image)
+            axs[1].set_title('Actual Colors')
             axs[1].axis('off')
+            axs[0].imshow(test_grayscale_image)
+            axs[0].set_title('Black and White Image')
+            axs[0].axis('off')
+            axs[2].imshow(model_output_image)
+            axs[2].set_title('Predicted Colors')
+            axs[2].axis('off')
             plt.show()
 
         elif MODE == CONTINUE_TRAINING:
@@ -131,6 +131,35 @@ if __name__ == '__main__':
                                                   DEVICE,
                                                   output_activation)
             save_net(model, SAVED_MODELS_FOLDER_PATH, SAVED_MODEL_NAME)
+
+        elif MODE == INFERENCE:
+            saved_weights = load_model(SAVED_MODELS_FOLDER_PATH, SAVED_MODEL_NAME)
+            model.load_state_dict(saved_weights)
+            model.to(DEVICE)
+
+            image_path = args[3]
+            if not os.path.exists(image_path):
+                raise DATASET_PATH_NOT_EXISTS_ERROR_MSG
+            image_data = read_image(image_path).float()
+            image_data_transformed = (image_transforms(convert_to_grayscale(image_data)).unsqueeze(dim=0).to(DEVICE))
+            with torch.no_grad():
+                output = model(image_data_transformed).detach().cpu()
+
+            prediction = output_activation(output)
+            prediction = np.squeeze(prediction)
+            predicted_image = prediction.permute(1, 2, 0)
+
+            fig, axs = plt.subplots(1, 3)
+            axs[1].set_title('Actual Colors')
+            axs[1].imshow(image_transforms(image_data).permute(1, 2, 0))
+            axs[1].axis('off')
+            axs[0].imshow(convert_to_grayscale(image_transforms(image_data)).permute(1, 2, 0), cmap='gray')
+            axs[0].set_title('Black and White Image')
+            axs[0].axis('off')
+            axs[2].imshow(predicted_image)
+            axs[2].set_title('Predicted Colors')
+            axs[2].axis('off')
+            plt.show()
 
         print('Program Finished')
 
